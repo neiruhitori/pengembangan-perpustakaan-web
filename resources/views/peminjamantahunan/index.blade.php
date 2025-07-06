@@ -197,8 +197,9 @@
                                             $p->status != 0;
                                     @endphp
                                     <td class="{{ $isOverdue ? 'text-red' : '' }}">
-                                        {{ $p->jam_kembali }}
+                                        {{ \Carbon\Carbon::parse($p->jam_kembali)->format('d-m-Y') }}
                                     </td>
+
                                     <td>
                                         <label
                                             class="label 

@@ -126,51 +126,49 @@ class PengembalianTahunanController extends Controller
     // }
     
     public function status($id)
-{
-    // Temukan peminjaman berdasarkan id
-    $pengembaliantahunan = PeminjamanTahunan::with('bukus.bukucruds')->find($id);
+    {
+        $pengembaliantahunan = PeminjamanTahunan::with('bukus.bukucruds')->find($id);
 
-    if (!$pengembaliantahunan) {
-        return response()->json(['message' => 'Peminjaman tidak ditemukan'], 404);
-    }
-
-    // Hitung denda jika terlambat
-    $tglKembali = Carbon::parse($pengembaliantahunan->jam_kembali);
-    $today = Carbon::now();
-    $isOverdue = $today->gt($tglKembali);
-    $lateYears = $isOverdue ? $today->diffInYears($tglKembali) : 0;
-    $lateFine = $lateYears * 50000; // Denda per tahun Rp 50.000
-
-    // Siapkan deskripsi denda jika ada
-    $description = '';
-    if ($lateYears > 0) {
-        $description = "Denda keterlambatan {$lateYears} tahun: Rp " . number_format($lateFine, 0, ',', '.');
-    }
-    if (request()->has('is_damaged')) {
-        $damageFine = 100000; // Denda kerusakan untuk peminjaman tahunan
-        $description .= ($description ? "\n" : "") . "Denda kerusakan/kehilangan buku: Rp " . number_format($damageFine, 0, ',', '.');
-        $lateFine += $damageFine;
-    }
-
-    // Update status peminjaman menjadi 0 (dikembalikan)
-    $pengembaliantahunan->status = 0;
-    if ($lateFine > 0) {
-        $pengembaliantahunan->description = $lateFine;
-        $pengembaliantahunan->description = $description;
-    }
-    $pengembaliantahunan->save();
-
-    // Tambahkan stok buku sesuai dengan jumlah yang dipinjam
-    foreach ($pengembaliantahunan->bukus as $buku) {
-        if ($buku->bukucruds) {
-            $buku->bukucruds->stok += $buku->jml_buku;
-            $buku->bukucruds->save();
+        if (!$pengembaliantahunan) {
+            return response()->json(['message' => 'Peminjaman tidak ditemukan'], 404);
         }
-    }
 
-    return redirect()->route('pengembaliantahunan')
-        ->with('success', 'Peminjaman selesai successfully' . ($lateFine > 0 ? ". Total denda: Rp " . number_format($lateFine, 0, ',', '.') : ''));
-}
+        // Hitung keterlambatan
+        $tglKembali = Carbon::parse($pengembaliantahunan->jam_kembali);
+        $today = Carbon::now();
+        $isOverdue = $today->gt($tglKembali);
+        $lateDays = $isOverdue ? $today->diffInDays($tglKembali) : 0;
+        $lateFine = $lateDays * 1000;
+
+        // Siapkan deskripsi denda jika ada
+        $description = '';
+        if ($lateDays > 0) {
+            $description = "Denda keterlambatan {$lateDays} hari: Rp " . number_format($lateFine, 0, ',', '.');
+        }
+        if (request()->has('is_damaged')) {
+            $damageFine = 100000; // Denda kerusakan untuk peminjaman tahunan
+            $description .= ($description ? "\n" : "") . "Denda kerusakan/kehilangan buku: Rp " . number_format($damageFine, 0, ',', '.');
+            $lateFine += $damageFine;
+        }
+
+        // Update status peminjaman menjadi 0 (dikembalikan)
+        $pengembaliantahunan->status = 0;
+        if ($lateFine > 0) {
+            $pengembaliantahunan->description = $description;
+        }
+        $pengembaliantahunan->save();
+
+        // Tambahkan stok buku sesuai dengan jumlah yang dipinjam
+        foreach ($pengembaliantahunan->bukus as $buku) {
+            if ($buku->bukucruds) {
+                $buku->bukucruds->stok += $buku->jml_buku;
+                $buku->bukucruds->save();
+            }
+        }
+
+        return redirect()->route('pengembaliantahunan')
+            ->with('success', 'Peminjaman selesai successfully' . ($lateFine > 0 ? ". Total denda: Rp " . number_format($lateFine, 0, ',', '.') : ''));
+    }
 
 
     public function view_pdf()

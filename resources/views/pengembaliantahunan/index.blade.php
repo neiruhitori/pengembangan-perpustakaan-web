@@ -115,10 +115,10 @@
                                     $isOverdue =
                                         \Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($k->jam_kembali)) &&
                                         $k->status != 0;
-                                    $lateYears = $isOverdue
-                                        ? \Carbon\Carbon::now()->diffInYears(\Carbon\Carbon::parse($k->jam_kembali))
+                                    $lateDays = $isOverdue
+                                        ? \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($k->jam_kembali))
                                         : 0;
-                                    $lateFine = $lateYears * 50000; // Denda per tahun Rp 50.000
+                                    $lateFine = $lateDays * 1000;
                                 @endphp
                                 <tr>
                                     <td scope="row">{{ $loop->iteration }}</td>
@@ -148,6 +148,7 @@
                                     <td class="{{ $isOverdue ? 'text-red' : '' }}">
                                         {{ \Carbon\Carbon::parse($k->jam_kembali)->format('d-m-Y') }}
                                     </td>
+
                                     <td>
                                         <label
                                             class="label 
@@ -205,7 +206,7 @@
 
                                                             @if ($isOverdue)
                                                                 <div class="alert alert-warning">
-                                                                    <p>Buku terlambat {{ $lateYears }} tahun</p>
+                                                                    <p>Buku terlambat {{ $lateDays }} hari</p>
                                                                     <p>Denda keterlambatan: Rp
                                                                         {{ number_format($lateFine, 0, ',', '.') }}</p>
                                                                 </div>

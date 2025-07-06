@@ -122,9 +122,15 @@
                                                     <option value="">Pilih Kode Buku</option>
                                                     @foreach ($bukucrud as $buku)
                                                         @foreach ($buku->kodebukucruds as $kode)
-                                                            <option value="{{ $kode->kodebuku }}">{{ $buku->buku }}
-                                                                -
-                                                                {{ $kode->kodebuku }}</option>
+                                                            @php
+                                                                $isDipinjam = isset($kodebukuDipinjam) &&
+                                                                    in_array($kode->kodebuku, $kodebukuDipinjam);
+                                                            @endphp
+                                                            <option value="{{ $kode->kodebuku }}"
+                                                                {{ $isDipinjam ? 'disabled' : '' }}>
+                                                                {{ $buku->buku }} - {{ $kode->kodebuku }}
+                                                                {{ $isDipinjam ? ' (Sedang Dipinjam)' : '' }}
+                                                            </option>
                                                         @endforeach
                                                     @endforeach
                                                 </select>
@@ -134,7 +140,7 @@
                                             <div class="form-group">
                                                 <label>Jumlah</label>
                                                 <input type="number" name="jml_buku[]" class="form-control" min="1"
-                                                    required>
+                                                    required readonly>
                                             </div>
                                         </div>
                                         <div class="col-md-2">
@@ -189,6 +195,16 @@
                             );
                         });
                     });
+                }
+            });
+
+            // Otomatis isi jumlah = 1 saat kode buku dipilih
+            $(document).on('change', 'select[name="kodebuku[]"]', function() {
+                const jmlInput = $(this).closest('.row').find('input[name="jml_buku[]"]');
+                if ($(this).val()) {
+                    jmlInput.val(1);
+                } else {
+                    jmlInput.val('');
                 }
             });
 

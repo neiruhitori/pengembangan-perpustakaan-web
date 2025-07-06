@@ -99,3 +99,8 @@
 
     })
 </script>
+<script>
+    $('#kodebuku').on('change', function() {
+        $('#jml_buku').val(1);
+    });
+</script>

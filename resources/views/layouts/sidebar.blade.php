@@ -453,7 +453,7 @@
                     class="nav-link  {{ Request::is('catatanharian') ? 'active' : '' }} {{ Request::is('catatantahunan') ? 'active' : '' }}">
                     <i class="nav-icon fas fa-pencil-alt"></i>
                     <p>
-                        Catatan
+                        Catatan Denda
                         <i class="fas fa-angle-left right"></i>
                     </p>
                 </a>
