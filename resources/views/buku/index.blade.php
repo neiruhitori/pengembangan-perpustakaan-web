@@ -175,7 +175,15 @@
                                     <td>
                                         <ul>
                                             @foreach($p->kodebukucruds as $kd)
-                                                <li>{{ $kd->kodebuku }}</li>
+                                                @php
+                                                    $isDipinjam = isset($kodebukuDipinjam) && in_array($kd->kodebuku, $kodebukuDipinjam);
+                                                @endphp
+                                                <li>
+                                                    {{ $kd->kodebuku }}
+                                                    @if ($isDipinjam)
+                                                        <span class="badge bg-danger">Sedang Dipinjam</span>
+                                                    @endif
+                                                </li>
                                             @endforeach
                                         </ul>
                                     </td>

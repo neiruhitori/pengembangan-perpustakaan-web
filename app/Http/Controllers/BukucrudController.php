@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Buku;
 use App\Models\Bukucrud;
 use App\Models\KodebukuTahunan;
 use App\Models\User;
@@ -21,11 +22,17 @@ class BukucrudController extends Controller
         $profile = User::where('id', $iduser)->first();
 
         if ($request->has('search')) {
-            $buku = Bukucrud::where('buku', 'LIKE', '%' . $request->search . '%')->paginate(5);
+            $buku = Bukucrud::with('kodebukucruds')->where('buku', 'LIKE', '%' . $request->search . '%')->paginate(5);
         } else {
-            $buku = Bukucrud::orderBy('created_at', 'DESC')->paginate(10);
+            $buku = Bukucrud::with('kodebukucruds')->orderBy('created_at', 'DESC')->paginate(10);
         }
-        return view('buku.index', compact('buku', 'profile'));
+
+        // Ambil kodebuku yang sedang dipinjam (status 1) dari tabel bukus yang relasi ke peminjamantahunan status 1
+        $kodebukuDipinjam = Buku::whereHas('peminjamantahunan', function ($q) {
+            $q->where('status', 1);
+        })->pluck('kodebuku')->toArray();
+
+        return view('buku.index', compact('buku', 'profile', 'kodebukuDipinjam'));
     }
 
     /**

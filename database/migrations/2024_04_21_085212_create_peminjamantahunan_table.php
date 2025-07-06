@@ -22,8 +22,8 @@ class CreatePeminjamantahunanTable extends Migration
             // $table->unsignedBigInteger('siswa_id');
             // $table->string('buku');
             // $table->string('jml_buku'); 
-            $table->date('jam_pinjam');
-            $table->date('jam_kembali');
+            $table->dateTime('jam_pinjam');
+            $table->dateTime('jam_kembali');
             $table->text('description')->nullable();
             $table->integer('status')->default(1); // 0: disable, 1: enable
             $table->timestamps();

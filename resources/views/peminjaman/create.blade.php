@@ -98,20 +98,23 @@
                                     <option selected disabled>Pilih Kode Buku</option>
                                     @foreach ($bukuharian as $buku)
                                         @foreach ($buku->kodebukuharians as $kode)
-                                            <option value="{{ $kode->kodebuku }}">{{ $buku->buku }} -
-                                                {{ $kode->kodebuku }}</option>
+                                            @php
+                                                $isDipinjam = in_array($kode->kodebuku, $kodebukuDipinjam ?? []);
+                                            @endphp
+                                            <option value="{{ $kode->kodebuku }}" {{ $isDipinjam ? 'disabled' : '' }}>
+                                                {{ $buku->buku }} - {{ $kode->kodebuku }}{{ $isDipinjam ? ' (Sedang Dipinjam)' : '' }}
+                                            </option>
                                         @endforeach
                                     @endforeach
                                 </select>
                             </div>
-
                             <div class="col-md-6">
                                 <label>Jumlah Buku :</label>
                                 @error('jml_buku')
                                     <div class="alert alert-danger">{{ $message }}</div>
                                 @enderror
                                 <input type="number" class="form-control" id="jml_buku" name="jml_buku"
-                                    placeholder=" Masukkan Jumlah Buku yang di Pinjam" autocomplete="off" min="1" />
+                                    placeholder=" Masukkan Jumlah Buku yang di Pinjam" autocomplete="off" min="1" readonly  />
                             </div>
                             <!-- Date and time -->
                             <div class="form-group col-md-2">
@@ -186,4 +189,20 @@
             </div>
 
         </form>
-    @endsection
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var kodebuku = document.getElementById('kodebuku');
+            var jml_buku = document.getElementById('jml_buku');
+            if (kodebuku && jml_buku) {
+                kodebuku.addEventListener('change', function() {
+                    if (this.value) {
+                        jml_buku.value = 1;
+                    } else {
+                        jml_buku.value = '';
+                    }
+                });
+            }
+        });
+    </script>
+@endsection

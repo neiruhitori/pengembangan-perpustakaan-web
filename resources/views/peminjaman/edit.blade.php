@@ -124,9 +124,14 @@
                                     <option value="">Pilih Kode Buku</option>
                                     @foreach ($bukuharian as $buku)
                                         @foreach ($buku->kodebukuharians as $kode)
+                                            @php
+                                                // Kode buku sedang dipinjam oleh orang lain
+                                                $isDipinjam = in_array($kode->kodebuku, $kodebukuDipinjam ?? []) && $peminjaman->kodebuku != $kode->kodebuku;
+                                            @endphp
                                             <option value="{{ $kode->kodebuku }}"
-                                                {{ $peminjaman->kodebuku == $kode->kodebuku ? 'selected' : '' }}>
-                                                {{ $buku->buku }} - {{ $kode->kodebuku }}
+                                                {{ $peminjaman->kodebuku == $kode->kodebuku ? 'selected' : '' }}
+                                                {{ $isDipinjam ? 'disabled' : '' }}>
+                                                {{ $buku->buku }} - {{ $kode->kodebuku }}{{ $isDipinjam ? ' (Sedang Dipinjam)' : '' }}
                                             </option>
                                         @endforeach
                                     @endforeach
@@ -135,7 +140,7 @@
                             <div class="col-md-6">
                                 <label>Jumlah Buku :</label>
                                 <input type="number" class="form-control" id="jml_buku" name="jml_buku"
-                                    value="{{ old('jml_buku', $peminjaman->jml_buku) }}" autocomplete="off" />
+                                    value="{{ old('jml_buku', $peminjaman->jml_buku) }}" autocomplete="off" readonly/>
                             </div>
 
                             <!-- Datetime inputs -->

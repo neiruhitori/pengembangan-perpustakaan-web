@@ -49,7 +49,11 @@ class PeminjamanController extends Controller
         $peminjaman = Peminjaman::all();
         $siswa = Siswa::all();
         $bukuharian = Bukusharian::all();
-        return view('peminjaman.create', compact('peminjaman', 'siswa', 'bukuharian', 'profile'));
+
+        // Ambil kodebuku yang sedang dipinjam (status 1)
+        $kodebukuDipinjam = Peminjaman::where('status', 1)->pluck('kodebuku')->toArray();
+
+        return view('peminjaman.create', compact('peminjaman', 'siswa', 'bukuharian', 'profile', 'kodebukuDipinjam'));
     }
 
     /**
@@ -125,7 +129,11 @@ class PeminjamanController extends Controller
         $peminjaman = Peminjaman::findOrFail($id);
         $siswa = Siswa::all();
         $bukuharian = Bukusharian::all();
-        return view('peminjaman.edit', compact('peminjaman', 'siswa', 'bukuharian', 'profile'));
+
+        // Ambil kodebuku yang sedang dipinjam (status 1)
+        $kodebukuDipinjam = Peminjaman::where('status', 1)->pluck('kodebuku')->toArray();
+
+        return view('peminjaman.edit', compact('peminjaman', 'siswa', 'bukuharian', 'profile', 'kodebukuDipinjam'));
     }
 
     /**

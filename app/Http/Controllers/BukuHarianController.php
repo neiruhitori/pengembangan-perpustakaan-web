@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Bukusharian;
 use App\Models\KodebukuHarian;
 use App\Models\User;
+use App\Models\Peminjaman;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -21,12 +22,6 @@ class BukuHarianController extends Controller
         $iduser = Auth::id();
         $profile = User::where('id', $iduser)->first();
 
-        // if ($request->has('search')) {
-        //     $bukuharian = Bukusharian::where('buku', 'LIKE', '%' . $request->search . '%')->paginate(5);
-        // } else {
-        //     $bukuharian = Bukusharian::orderBy('created_at', 'DESC')->paginate(10);
-        // }
-
         if ($request->has('search')) {
             $bukuharian = Bukusharian::with('kodebukuharians')
                 ->where('buku', 'LIKE', '%' . $request->search . '%')
@@ -36,7 +31,11 @@ class BukuHarianController extends Controller
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
         }
-        return view('bukuharian.index', compact('bukuharian', 'profile'));
+
+        // Ambil kodebuku yang sedang dipinjam (status 1)
+        $kodebukuDipinjam = Peminjaman::where('status', 1)->pluck('kodebuku')->toArray();
+
+        return view('bukuharian.index', compact('bukuharian', 'profile', 'kodebukuDipinjam'));
     }
 
     /**

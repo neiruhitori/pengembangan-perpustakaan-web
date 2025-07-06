@@ -21,17 +21,19 @@ class CatatanTahunanController extends Controller
 
         $keyword = $request->input('search');
         if ($request->has('search')) {
-            $catatan = PeminjamanTahunan::whereHas('siswas', function ($query) use ($keyword) {
-                $query->where('name', 'like', '%' . $keyword . '%');
-            })->orWhereHas('siswas', function ($query) use ($keyword) {
-                $query->where('kelas', 'like', '%' . $keyword . '%');
-            })
-                ->orderByRaw('CASE WHEN description IS NULL THEN 1 ELSE 0 END')  // Prioritaskan yang ada isi
-                ->orderBy('updated_at', 'desc')  // Yang terbaru update di atas
-                ->orderBy('description', 'asc')  // Kemudian urutkan berdasarkan description
+            $catatan = PeminjamanTahunan::whereNotNull('description')
+                ->whereHas('siswas', function ($query) use ($keyword) {
+                    $query->where('name', 'like', '%' . $keyword . '%');
+                })->orWhereHas('siswas', function ($query) use ($keyword) {
+                    $query->where('kelas', 'like', '%' . $keyword . '%');
+                })
+                ->orderByRaw('CASE WHEN description IS NULL THEN 1 ELSE 0 END')
+                ->orderBy('updated_at', 'desc')
+                ->orderBy('description', 'asc')
                 ->get();
         } else {
-            $catatan = PeminjamanTahunan::orderByRaw('CASE WHEN description IS NULL THEN 1 ELSE 0 END')
+            $catatan = PeminjamanTahunan::whereNotNull('description')
+                ->orderByRaw('CASE WHEN description IS NULL THEN 1 ELSE 0 END')
                 ->orderBy('updated_at', 'desc')
                 ->orderBy('description', 'asc')
                 ->paginate(35);

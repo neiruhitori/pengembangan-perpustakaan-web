@@ -51,7 +51,13 @@ class PeminjamanTahunanController extends Controller
         $peminjamantahunan = PeminjamanTahunan::all();
         $siswa = Siswa::all();
         $bukucrud = Bukucrud::all();
-        return view('peminjamantahunan.create', compact('peminjamantahunan', 'siswa', 'profile', 'bukucrud'));
+
+        // Ambil kodebuku yang sedang dipinjam (status 1) dari tabel bukus yang relasi ke peminjamantahunan status 1
+        $kodebukuDipinjam = \App\Models\Buku::whereHas('peminjamantahunan', function ($q) {
+            $q->where('status', 1);
+        })->pluck('kodebuku')->toArray();
+
+        return view('peminjamantahunan.create', compact('peminjamantahunan', 'siswa', 'profile', 'bukucrud', 'kodebukuDipinjam'));
     }
 
     /**
@@ -165,12 +171,24 @@ class PeminjamanTahunanController extends Controller
         $iduser = Auth::id();
         $profile = User::where('id', $iduser)->first();
 
-        // Ambil data peminjamantahunan beserta buku dan relasi ke bukucrud
         $peminjamantahunan = PeminjamanTahunan::with('bukus.bukucruds')->findOrFail($id);
         $siswas = Siswa::all();
         $bukucrud = Bukucrud::all();
         $bukus = Buku::with('bukucruds')->get();
-        return view('peminjamantahunan.edit', compact('peminjamantahunan', 'bukucrud', 'siswas', 'bukus', 'profile'));
+
+        // Ambil kodebuku yang sedang dipinjam (status 1) dari tabel bukus yang relasi ke peminjamantahunan status 1
+        $kodebukuDipinjam = \App\Models\Buku::whereHas('peminjamantahunan', function ($q) use ($id) {
+            $q->where('status', 1)->where('id', '!=', $id);
+        })->pluck('kodebuku')->toArray();
+
+        return view('peminjamantahunan.edit', compact(
+            'peminjamantahunan',
+            'bukucrud',
+            'siswas',
+            'bukus',
+            'profile',
+            'kodebukuDipinjam'
+        ));
     }
 
     /**
